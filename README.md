@@ -169,3 +169,50 @@ LC35搜索插入位置
       *  ①就是这个位置，即nums[mid]>target时，此时执行了right=mid-1，返回left正确
 
       *  ②是该位置的右边一个，即nums[mid]<target时，此时执行了left=mid+1,返回left也正确
+
+***
+
+LC33搜索旋转数组
+
+具体思路：跟二分查找类似，当mid == target的时候，直接返回。然后就要确认mid是数组的左段还是右段了，如果最左值小于等于mid，那么代表mid在左段，反之在右段。如果在左段，判断target在不在左段中，如果在那么缩小右边界，如果不在缩小左边界。如果在右段，判断target在不在右段中，如果在缩小左边界，如果不在缩小右边界。最后如果一直找不到返回-1.
+
+***
+
+LC4寻找两个有序数组的中位数
+
+```
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        int n = nums1.length;
+        int m = nums2.length;
+        //如果是奇数长度，那么leftM == rightM，如果不是的话，那么就需要找leftM和rightM的平均值了。
+        int leftM = (n + m + 1) / 2;
+        int rightM = (n + m + 2) / 2;
+        return (getKth(nums1, 0, n - 1, nums2, 0, m - 1, leftM) + getKth(nums1, 0, n -1, nums2, 0, m - 1, rightM)) * 0.5;
+    
+    } 
+    private int getKth(int[] nums1, int start1, int end1, int[] nums2, int start2, int end2, int k){
+        //首先判断数组1和数组2的剩余长度
+        int len1 = end1 - start1 + 1;
+        int len2 = end2 - start2 + 1;
+        //要把最短的数组放到前面，这样如果有一个数组长度为0的话那么一定是前面的那个数组。
+        if(len1 > len2) return getKth(nums2, start2, end2, nums1, start1, end1, k);
+        //如果有数组长度为0，就直接找剩余数组第k大的数字即可
+        if(len1 == 0){
+            return nums2[start2 + k - 1];
+        }
+        //如果k只剩一，那么只需要找一个数组，就比对数组1和数组2的当前数字即可。
+        if (k == 1) return Math.min(nums1[start1], nums2[start2]);
+        //如果k/2大于数组长度，那么就用数组长度
+        int i = start1 + Math.min(len1, k / 2) - 1;
+        int j = start2 + Math.min(len2, k / 2) - 1;
+        //如果数组1第k大的数大于数组2第k大的数，那么就舍去数组2的前k个数，然后更新舍去的k的数量
+        if(nums1[i] > nums2[j]){
+            return getKth(nums1, start1, end1, nums2, j + 1, end2, k - (j - start2 + 1));
+        }
+        else{
+            return getKth(nums1, i + 1, end1, nums2, start2, end2, k - (i - start1 + 1));
+        }
+    }  
+}
+```
