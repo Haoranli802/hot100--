@@ -265,3 +265,60 @@ O(NlogK), O(K)
 桶排：首先先把值和出现频率放入哈希表。然后创建一个数组，每个数组都是一个list，将频率作为数组下标把频率对应的值存入下标里的list即可。然后反向遍历频率list，加入结果数组返回。
 
 O(N), O(N)
+
+***
+
+###LC295数据流的中位数
+
+```
+class MedianFinder {
+    PriorityQueue<Integer> l = new PriorityQueue<>((a,b)->b-a);
+    PriorityQueue<Integer> r = new PriorityQueue<>((a,b)->a-b);
+    public void addNum(int num) {
+        int s1 = l.size(), s2 = r.size();
+        if (s1 == s2) {
+            if (r.isEmpty() || num <= r.peek()) {
+                l.add(num);
+            } else {
+                l.add(r.poll());
+                r.add(num);
+            }
+        } else {
+            if (l.peek() <= num) {
+                r.add(num);
+            } else {
+                r.add(l.poll());
+                l.add(num);
+            }
+        }
+    }
+    public double findMedian() {
+        int s1 = l.size(), s2 = r.size();
+        if (s1 == s2) {
+            return (l.peek() + r.peek()) / 2.0;
+        } else {
+            return l.peek();
+        }
+    }
+}
+/**
+用两个优先队列(大堆和小堆)来模拟整个数据流，左边的为大堆，右边的为小堆，这样保证数据流的有序。
+当数据流最后数量为偶数，那么中位数就是大小堆的顶部和除以2，如果数量为奇数，我们永远保持左边的大堆
+长度比右边的小堆长度加一那么中位数就是大堆的顶部。
+
+addNum时，
+
+1.插入前两者大小相同，说明插入前数据流元素个数为偶数，插入后变为奇数。我们期望操作完达到「l 的数量为 r 多一，同时双堆维持有序」，进一步分情况讨论：
+
+如果 r 为空，说明当前插入的是首个元素，直接添加到 l 即可；
+如果 r 不为空，且 num <= r.peek()，说明 num 的插入位置不会在后半部分（不会在 r 中），直接加到 l 即可；
+如果 r 不为空，且 num > r.peek()，说明 num 的插入位置在后半部分，此时将 r 的堆顶元素放到 l 中，再把 num 放到 r（相当于从 r 中置换一位出来放到 l 中）。
+
+2.插入前两者大小不同，说明前数据流元素个数为奇数，插入后变为偶数。我们期望操作完达到「l 和 r 数量相等，同时双堆维持有序」，进一步分情况讨论（此时 l 必然比 r 元素多一）：
+如果 num >= l.peek()，说明 num 的插入位置不会在前半部分（不会在 l 中），直接添加到 r 即可。
+如果 num < l.peek()，说明 num 的插入位置在前半部分，此时将 l 的堆顶元素放到 r 中，再把 num 放入 l 中（相等于从 l 中替换一位出来当到 r 中）。
+
+addO(logN), findMedianO(1)
+
+ */
+```
